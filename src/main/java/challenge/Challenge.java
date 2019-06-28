@@ -6,7 +6,7 @@ public class Challenge {
         CaesarChallenge challenge = new CaesarChallenge(
                 System.getenv("api.get.resource"),
                 System.getenv("api.post.resource"),
-                System.getenv("challenge.output.fileName")
+                System.getenv("challenge.answer.fileName")
         );
 
         challenge.get();

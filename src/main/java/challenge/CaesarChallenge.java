@@ -63,11 +63,10 @@ public class CaesarChallenge {
     }
 
     public void save() {
-        String fileName = "answer.json";
-        logger.info("Saving solution to file: \"{}\"", fileName);
+        logger.info("Saving solution to file: \"{}\"", challengeAnswerFileName);
 
         try {
-            message.serializeToJson(fileName);
+            message.serializeToJson(challengeAnswerFileName);
         } catch (IOException e) {
             logger.error("Oops, something wrong happened while saving", e);
         }
