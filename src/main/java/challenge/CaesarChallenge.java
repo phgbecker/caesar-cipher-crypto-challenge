@@ -17,25 +17,31 @@ public class CaesarChallenge {
     private final ApiRequest apiRequest;
     private final String apiGetResource;
     private final String apiPostResource;
+    private final String challengeAnswerFileName;
     private MessageRequest message;
 
 
-    public CaesarChallenge(String apiGetResource, String apiPostResource) {
+    public CaesarChallenge(String apiGetResource, String apiPostResource, String challengeAnswerFileName) {
         this.apiRequest = new ApiRequest();
 
-        this.apiGetResource = Objects.requireNonNull(apiGetResource, "API GET resource has not been set");
-        this.apiPostResource = Objects.requireNonNull(apiPostResource, "API POST resource has not been set");
+        try {
+            this.apiGetResource = Objects.requireNonNull(apiGetResource, "API GET resource");
+            this.apiPostResource = Objects.requireNonNull(apiPostResource, "API POST resource");
+            this.challengeAnswerFileName = Objects.requireNonNull(challengeAnswerFileName, "Challenge answer file name");
+        } catch (NullPointerException e) {
+            throw new NullPointerException("Variable \"" + e.getMessage() + "\" has not been set");
+        }
     }
 
 
     public void get() {
         logger.info("Getting challenge from resource: {}", apiGetResource);
 
-        try {
-            CloseableHttpResponse response = apiRequest.get(apiGetResource);
-
+        try (
+                CloseableHttpResponse getResponse = apiRequest.get(apiGetResource)
+        ) {
             message = MessageRequest.deserializeFromJson(
-                    apiRequest.parseResponse(response)
+                    apiRequest.parseResponse(getResponse)
             );
         } catch (IOException e) {
             logger.error("Oops, something wrong happened while getting the challenge", e);
@@ -43,7 +49,7 @@ public class CaesarChallenge {
     }
 
     public void solve() {
-        logger.info("Applying actions to solve it");
+        logger.info("Applying actions to solve challenge: \"{}\"", message.getCipheredMessage());
 
         message.applyAction(
                 Arrays.asList(
@@ -51,11 +57,14 @@ public class CaesarChallenge {
                         new HashAction()
                 )
         );
+
+        logger.info("Deciphered message: \"{}\"", message.getDecipheredMessage());
+        logger.info("Hashed message: \"{}\"", message.getHashedMessage());
     }
 
     public void save() {
         String fileName = "answer.json";
-        logger.info("Saving solution to file: {}", fileName);
+        logger.info("Saving solution to file: \"{}\"", fileName);
 
         try {
             message.serializeToJson(fileName);
@@ -68,17 +77,17 @@ public class CaesarChallenge {
         logger.info("Posting solutions to resource: {}", apiPostResource);
 
         String apiResponse = null;
-        try {
-            CloseableHttpResponse response = apiRequest.post(
-                    apiPostResource,
-                    apiRequest.attachFileToForm("answer", "answer.json")
-            );
-
-            apiResponse = apiRequest.parseResponse(response);
+        try (
+                CloseableHttpResponse postResponse = apiRequest.post(
+                        apiPostResource,
+                        apiRequest.attachFileToForm("answer", challengeAnswerFileName)
+                )
+        ) {
+            apiResponse = apiRequest.parseResponse(postResponse);
         } catch (IOException e) {
             logger.error("Oops, something wrong happened while posting the solutions", e);
         }
 
-        logger.info("Challenge submission response was {}", apiResponse);
+        logger.info("Challenge submission response was: {}", apiResponse);
     }
 }
