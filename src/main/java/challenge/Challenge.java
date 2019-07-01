@@ -9,9 +9,9 @@ public class Challenge {
                 System.getenv("challenge.answer.fileName")
         );
 
-        challenge.get();
-        challenge.solve();
-        challenge.save();
-        challenge.post();
+        challenge.get()
+                .solve()
+                .save()
+                .post();
     }
 }

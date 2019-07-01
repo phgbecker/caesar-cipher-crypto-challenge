@@ -32,7 +32,7 @@ class CaesarChallenge {
         }
     }
 
-    void get() {
+    CaesarChallenge get() {
         logger.info("Getting challenge from resource: {}", apiGetResource);
 
         try (
@@ -44,9 +44,11 @@ class CaesarChallenge {
         } catch (IOException e) {
             logger.error("Oops, something wrong happened while getting the challenge", e);
         }
+
+        return this;
     }
 
-    void solve() {
+    CaesarChallenge solve() {
         logger.info("Applying actions to solve challenge: '{}'", message.getCipheredMessage());
 
         message.applyAction(
@@ -58,9 +60,11 @@ class CaesarChallenge {
 
         logger.info("Deciphered message: '{}'", message.getDecipheredMessage());
         logger.info("Hashed message: '{}'", message.getHashedMessage());
+
+        return this;
     }
 
-    void save() {
+    CaesarChallenge save() {
         logger.info("Saving solution to file: '{}'", challengeAnswerFileName);
 
         try {
@@ -68,9 +72,11 @@ class CaesarChallenge {
         } catch (IOException e) {
             logger.error("Oops, something wrong happened while saving", e);
         }
+
+        return this;
     }
 
-    void post() {
+    CaesarChallenge post() {
         logger.info("Posting solutions to resource: {}", apiPostResource);
 
         String apiResponse = null;
@@ -86,5 +92,7 @@ class CaesarChallenge {
         }
 
         logger.info("Challenge submission response was: {}", apiResponse);
+
+        return this;
     }
 }
